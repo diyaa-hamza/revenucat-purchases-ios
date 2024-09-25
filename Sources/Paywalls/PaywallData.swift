@@ -204,10 +204,20 @@ extension PaywallData {
         for requiredLocale: Locale,
         localizationByLocale: [String: Value]
     ) -> Value? {
-        localizationByLocale[requiredLocale.identifier] ??
-        localizationByLocale.first { locale, _ in
-            Locale(identifier: locale).sharesLanguageCode(with: requiredLocale)
-        }?.value
+             // Check if there's an exact match for the required locale
+         if let exactMatch = localizationByLocale[requiredLocale.identifier] {
+             return exactMatch
+         }
+         
+         // Special fallback for "ar" to "ar_SA"
+         if requiredLocale.identifier == "ar", let arabicFallback = localizationByLocale["ar_SA"] {
+             return arabicFallback
+         }
+         
+         // Fallback to any locale that shares the same language code
+         return localizationByLocale.first { locale, _ in
+             Locale(identifier: locale).sharesLanguageCode(with: requiredLocale)
+         }?.value
     }
 
 }
@@ -822,4 +832,5 @@ private extension Locale {
         }
     }
 
+}
 }
